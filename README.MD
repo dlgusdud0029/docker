@@ -97,6 +97,7 @@ docker image ls
 docker image push hyoungl2/frontend:1.0
 ```
 
+
 ## 도커의 컨테이너
 ```
 # 실질적으로 도터 위에서 작동하는 인스턴스, 이미지로는 아무것도 작업X
@@ -210,6 +211,45 @@ docker container ps
 # docker container --help
 ```
 
+
 ## 도커 네트워크
+```
+# 여러개의 컨테이너들 연결
+# 3-tier(web(nginx:react), was(SB), db(mysql)) 연동 -> 동일 네트워크 구성(상호간 통신 가능)
+# net1 : web와 was 연결
+# net2 : was와 db 연결
+
+# 7. network
+# 조회
+docker network ls
+# 지정하지 않으면 bridge가 기본으로 지정
+---
+NETWORK ID     NAME      DRIVER    SCOPE
+ebd1c7839226   bridge    bridge    local <- basic network
+d8befc7e7a81   host      host      local
+b4b768e7c674   none      null      local
+---
+
+# 7-1. network 생성
+# bridge : 여러개의 네트워크를 연결해주는 드라이버
+docker network create --driver=bridge web
+
+# 7-2. network 조회
+# filtering
+# driver=bridge인 네트워크만 조회 가능(네트워크가 많을 때 사용)
+docker network ls --filter driver=bridge
+
+# 7-3. container에 network 연결
+docker network connect web my_jdk17
+
+# 7-4. 상세정보 확인
+docker container inspect my_jdk17
+
+# 7-5. network 연결 끊기
+docker network disconnect web my_jdk17
+
+# 7-6. network 제거(rm)
+docker network rm web
+```
 
 ## 도커 볼륨
