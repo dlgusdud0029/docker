@@ -1,3 +1,5 @@
+# docker build -t test_ud:2.0 ./lec2
+
 # 컨테이너 베이스 이미지
 FROM ubuntu
 
@@ -16,8 +18,16 @@ ADD README.MD /home/README2.MD
 ADD po*.txt /home/
 
 # 특정 패턴을 가진 파일 추가
-# 문자 1회 등장
+# 문자 1회 등장 -> to11은 대상이 될 수 없음
 ADD to?.txt /home/
+
+# 컨테이너 생성 후 확인
+# docker run -itd --name test_ub20 test_ud:2.0
+# ---
+# root@bc2368392afe:/# cd home
+# root@bc2368392afe:/home# ls
+# README2.MD  a.txt  b.txt  c.txt  po.txt  po1.txt  po3456.txt  requirements.txt  to1.txt  ubuntu
+# ---
 
 
 # COPY는 WORKDIR 명령어 사용시 적용
