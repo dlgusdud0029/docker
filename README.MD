@@ -98,6 +98,58 @@ docker image push hyoungl2/frontend:1.0
 ```
 
 ## 도커의 컨테이너
+```
+# 실질적으로 도터 위에서 작동하는 인스턴스, 이미지로는 아무것도 작업X
+# 5. 컨테이너
+# 명령어 구조
+docker container(1차) COMMAND(2차) 옵션
+docker container(1차) COMMAND(2차) --help => 도움말
+
+# 5-1. 우분투 설치(컨테이너 구성, 가동)
+# a.이미지 다운 -> b.컨테이너 생성 -> c.컨테이너 가동 -> d.사용 ... -> 컨테이너 중단 -> 컨테이너 삭제 -> 이미지 삭제
+# 위의 a-d까지 한번에 처리 = run(고유한 2차 명령어, container 생략 가능)
+# i: 입력, t: 출력, d: 백그라운드
+# --name : 컨테이너 이름
+# ubuntu 자리에 값 : 이미지 명
+docker run -itd --name my_ubuntu ubuntu
+해시 값(고유번호) : aa818112f738f79a713eaf6817eba52d884cd15be3f9e870b4b8fc0e59a8058f
+# 도커 위에 우분트 기능을 수행하는 컨테이너 1개 구성(독립적, 격리, 언제든지 삭제 가능)
+
+# 5-2. 컨테이너 접속
+# EC2 인스턴스 -> 연결 -> 터미널 오픈 -> 명령어 업무 수행
+docker exec -it my_ubuntu bash
+---
+root@aa818112f738:/# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@aa818112f738:/# cd /home/ubuntu
+root@aa818112f738:/home/ubuntu# exit
+exit
+---
+
+# 5-3. nginx 컨테이너 생성 및 가동 -> 서비스 개념(포트관리)
+# nginx -> 웹서버 -> 80포트 사용 -> URL 요청시 생략됨
+# -p 80:80 = 포트 지정, [로컬 PC에서 접근 포트]:[컨테이너 내부적 접근 포트]
+docker run -d -p 80:80 --name my_nginx nginx
+
+# 5-4. 컨테이너 가동후 my_nginx 에 접속 정보 확인
+# cat /etc/nginx/conf.d/default.conf
+docker exec -it my_nginx bash
+cat /etc/nginx/conf.d/default.conf
+---
+# nginx의 구성 파일 (기존 내용 수정 혹은 추가 생성 방식)
+# - 가상 호스트 관리(1개의 IP에서 포트를 나눠서 여러개의 도메인 연결 호스팅)
+# - 프록시 처리
+#   - 요청 : nginx(정적 데이터 처리) + springboot(동적처리)
+#   - was 서버가 웹서버 만큼의 퍼포먼스를 부여하지 않음(용도가 다름)
+root@787daa591683:/# cat /etc/nginx/conf.d/default.conf
+server {
+    listen       80;
+    ...
+---
+
+# 5-5. nginx 로그 확인
+docker logs my_nginx
+```
 
 ## 도커 네트워크
 
