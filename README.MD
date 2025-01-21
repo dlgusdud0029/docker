@@ -131,7 +131,7 @@ exit
 # -p 80:80 = 포트 지정, [로컬 PC에서 접근 포트]:[컨테이너 내부적 접근 포트]
 docker run -d -p 80:80 --name my_nginx nginx
 
-# 5-4. 컨테이너 가동후 my_nginx 에 접속 정보 확인
+# 컨테이너 가동후 my_nginx 에 접속 정보 확인
 # cat /etc/nginx/conf.d/default.conf
 docker exec -it my_nginx bash
 cat /etc/nginx/conf.d/default.conf
@@ -147,8 +147,67 @@ server {
     ...
 ---
 
-# 5-5. nginx 로그 확인
+# nginx 로그 확인
 docker logs my_nginx
+
+# 5-4. 자바
+# 해시값 : 3f0d81b16464d11b81a14de491752401440a75e4e2438346a077c9530d83fe51
+docker run -itd --name my_jdk17 openjdk:17
+# bash 쉘을 이용하여 접속
+docker exec -it my_jdk17 bash
+---
+bash-4.4# java -version
+openjdk version "17.0.2" 2022-01-18
+OpenJDK Runtime Environment (build 17.0.2+8-86)
+OpenJDK 64-Bit Server VM (build 17.0.2+8-86, mixed mode, sharing)
+bash-4.4# exit
+exit
+---
+# 향후, 해당 컨테이너에 빌드된 *.jar 배포
+# 컨테이너 가동시 java -jar *.jar 자동 수행 -> sb 가동되며 컨테이너 가동
+
+# 5-5. mysql 설치
+# 기존의 가동중인 컨테이너 중에 mysql이 있다면 중단 -> 포트 충돌을 막기 위함
+# 환경변수 계정 생성 : --env MYSQL_USER=dev : dev 유저 생성 / --env MYSQL_PASSWORD=1234 : PW 등록
+# --env MYSQL_ROOT_PASSWORD : root 계정의 비번 설정
+# 해시값 : 6cbb6886c28f90bb0c8d04d2cd7f209b67303cc82cfbb2527dfed86297f708a8
+docker run -d -p 3306:3306 --name my_mysql --env MYSQL_USER=dev --env MYSQL_PASSWORD=1234 --env MYSQL_ROOT_PASSWORD=1234 mysql
+# 접속
+docker exec -it my_mysql bash
+---
+# root 계정으로 로그인
+bash-5.1# mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+...
+mysql>
+
+show databases;
+use mysql;
+show tables;
+desc user;
+
+# 환경변수 입력 => 계정생성 확인
+mysql> select Host, User from user;
++-----------+------------------+
+| Host      | User             |
++-----------+------------------+
+| %         | dev              |
+| %         | root             |
+| localhost | mysql.infoschema |
+| localhost | mysql.session    |
+| localhost | mysql.sys        |
+| localhost | root             |
++-----------+------------------+
+---
+
+# 5-6. 컨테이너 목록 조회
+# 구동 중인 전체 컨테이너 목록 조회
+docker container ls
+docker container ps
+
+# 6. 도움말 (--help)
+# docker container --help
 ```
 
 ## 도커 네트워크
