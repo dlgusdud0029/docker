@@ -234,7 +234,7 @@ b4b768e7c674   none      null      local
 # bridge : 여러개의 네트워크를 연결해주는 드라이버
 docker network create --driver=bridge web
 
-# 7-2. network 조회
+# 7-2. network 목록 조회
 # filtering
 # driver=bridge인 네트워크만 조회 가능(네트워크가 많을 때 사용)
 docker network ls --filter driver=bridge
@@ -245,7 +245,7 @@ docker network connect web my_jdk17
 # 7-4. 상세정보 확인
 docker container inspect my_jdk17
 
-# 7-5. network 연결 끊기
+# 7-5. network 연결 종료
 docker network disconnect web my_jdk17
 
 # 7-6. network 제거(rm)
@@ -253,3 +253,96 @@ docker network rm web
 ```
 
 ## 도커 볼륨
+```
+# 특징
+# - 컨테이너의 생애주기와 별개로 운영
+# - 호스트 OS(pc) 등에 별도로 위치, 공유 가능
+# - 여러 컨테이터가 공유 가능
+# - 저장공간!!
+# 종류
+# - 볼륨 마운트
+#   - 도커 엔진 내부에 저장 : 리눅스 경로를 따름
+# - 바인드 마운트
+#   - 호스트 OS 경로를 따름(컨테이너 내부의 데이터를 호스트 OS 엑세스 가능
+# - 메모리 마운트
+#   - 호스트 OS가 리눅스일때만 가능
+
+# 8. 볼륨 마운트
+# 8-1. 목록 확인
+docker volume ls
+
+# 8-2. 볼륨 생성
+docker volume create my_vol
+---
+DRIVER    VOLUME NAME
+local     3c83c43a45c4192d9998fad8884dd402e2c102f73f798a6b2a29121ea249f4e5
+local     my_vol
+---
+
+# 8-3. 볼륨 상세정보 확인
+# 도커 클라이언트 삭제 전에는 계속 남아있음!!
+docker volume inspect my_vol
+
+# 8-4. 컨테이너 생성시, 볼륨 적용 : 생성 후에는 적용 불가!!
+# 옵션 : -v <볼륨명>:<컨테이너상 특정 위치>:[읽기전용(ro) 등 mode지정]
+# -v my_vol:/home
+docker run -itd --name my_ub -v my_vol:/home ubuntu
+# 접속
+docker exec -it my_ub bash
+---
+root@82faa0b49210:/# cd /home
+root@82faa0b49210:/home# ls -al
+total 12
+drwxr-xr-x 3 root   root   4096 Jan 21 05:54 .
+drwxr-xr-x 1 root   root   4096 Jan 21 05:54 ..
+drwxr-x--- 2 ubuntu ubuntu 4096 Jan 21 05:54 ubuntu
+root@82faa0b49210:/home# echo "hi" > text.txt
+root@82faa0b49210:/home# ls
+text.txt  ubuntu
+root@82faa0b49210:/home# cat text.txt
+hi
+---
+
+# 8-5. 컨테이너 2개 생성, 볼륨 마운트 공유
+# my_vol을 볼륨 마운트 지정 : 특정 컨테이너에서 파일 생성 -> 다른 컨테이너에서 공유됨
+docker run -itd --name my_ub2 -v my_vol:/home ubuntu
+docker run -itd --name my_ub3 -v my_vol:/home ubuntu
+# my_ub2 접속
+docker exec -it my_ub2 bash
+---
+# 다른 컨테이너에서 만든 파일이 확인(공유됨)
+root@ad0372b08d18:/# ls /home
+text.txt  ubuntu
+root@ad0372b08d18:/# cat /home/text.txt
+hi
+root@ad0372b08d18:/# cd /home                
+root@ad0372b08d18:/home# echo "hello" > text2.txt
+root@ad0372b08d18:/home# ls
+text.txt  text2.txt  ubuntu
+root@ad0372b08d18:/home# exit
+exit
+---
+
+# 8-6. 읽기 전용(ro)
+docker run -itd --name my_ub4 -v my_vol:/home:ro ubuntu
+---
+# cd home
+# pwd
+/home
+# ls
+text.txt  text2.txt  ubuntu
+# echo "1234" > t.txt
+/bin/sh: 4: cannot create t.txt: Read-only file system
+---
+
+# 9. 바인드 마운트
+# 호스트 OS의 특정 경로를 볼륨으로 사용
+# 옵션 : -v <호스트 OS의 경로>:<컨테이너상 경로>:[권한]
+# <호스트 OS의 경로>법
+# bash shell (맥)     => "$(pwd)"
+# power shell (윈도우) => "${pwd}"
+docker run -itd --name my_ub5 -v ${pwd}:/home ubuntu
+# 접속
+docker exec -it my_ub5 bash
+# docker cli end
+```
