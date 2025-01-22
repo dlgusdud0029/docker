@@ -204,8 +204,8 @@ mysql> select Host, User from user;
 
 # 5-6. 컨테이너 목록 조회
 # 구동 중인 전체 컨테이너 목록 조회
-docker container ls
-docker container ps
+docker container ls -> 목록
+docker container ps -> 구동 중인 컨테이너 목록
 
 # 6. 도움말 (--help)
 # docker container --help
